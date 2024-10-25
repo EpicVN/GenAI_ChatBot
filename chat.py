@@ -1,7 +1,10 @@
 import os
 import google.generativeai as genai
+from dotenv import load_dotenv
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+load_dotenv()
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Create the model
 generation_config = {
@@ -17,23 +20,23 @@ model = genai.GenerativeModel(
   generation_config=generation_config,
 )
 
-chat_session = model.start_chat(
-  history=[
-    {
-      "role": "user",
-      "parts": [
-        "Hello\n",
-      ],
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Hello! How can I help you today? \n",
-      ],
-    },
-  ]
-)
+history = []
 
-response = chat_session.send_message("INSERT_INPUT_HERE")
+print("Bot: Hello, how can I help you?")
 
-print(response.text)
+while True:
+  user_input = input("You: ")
+  
+  chat_session = model.start_chat(
+    history=history
+  )
+
+  response = chat_session.send_message(user_input)
+  
+  model_response = response.text
+  
+  print(f'Bot: {model_response}')
+  print()
+  
+  history.append({"role": "user", "parts": [user_input]})
+  history.append({"role": "model", "parts": [model_response]})
